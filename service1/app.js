@@ -5,13 +5,19 @@ const app = express();
 app.use(express.json());
 
 const doRun = async () => {
-    const db = new sequelize(producer.env.POSTGRES_URL);
+
+    const db = new sequelize('service1', 'postres', 'password', {
+        host: 'postgres',
+        port: 5432,
+        dialect: 'postgres'
+    });
+
     const User = db.define('user', {
         name: sequelize.STRING,
         email: sequelize.STRING,
         password: sequelize.STRING
     });
-    
+
     db.sync({ force: true});
 
     const client = new kafka.KafkaClient({kafkaHost: process.env.KAFKA_BOOTSTRAP_SERVER});
@@ -31,7 +37,7 @@ const doRun = async () => {
     });
 }
 
-setTimeout(doRun, 10000);
+setTimeout(doRun, 1000);
 
 
 app.listen(process.env.PORT, (err) => {
