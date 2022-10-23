@@ -4,13 +4,15 @@ const sequelize = require('sequelize');
 const app = express();
 app.use(express.json());
 
-const doRun = () => {
+const doRun = async () => {
     const db = new sequelize(producer.env.POSTGRES_URL);
     const User = db.define('user', {
         name: sequelize.STRING,
         email: sequelize.STRING,
         password: sequelize.STRING
     });
+    
+    db.sync({ force: true});
 
     const client = new kafka.KafkaClient({kafkaHost: process.env.KAFKA_BOOTSTRAP_SERVER});
     const producer = new kafka.Producer(client);
@@ -26,7 +28,6 @@ const doRun = () => {
                 }
             });
         });
-
     });
 }
 
