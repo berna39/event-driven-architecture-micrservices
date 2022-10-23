@@ -1,0 +1,71 @@
+version: '3.8'
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/kafka
+    ports:
+      - 2081:2081
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka
+    ports:
+      - 9092:9092
+    volumes:
+      - ./data/kafka:/var/run/docker.sock
+    environment:
+      - KAFKA_ADVERTISED_HOST_NAME=kafka
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2081
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongo:./data/db
+  postgres:
+    container_name: postgres
+    image: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+  service1:
+    container_name: service1
+    ports:
+      - 4000:4000
+    build: ./service1
+    volumes:
+      - ./service1:/app
+    environment:
+      - PORT=4000
+      - POSTGRES_URL:postgres://postgres:postgres@postgres:5432/postgres
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - KAFKA_TOPIC=topic1
+    depends_on:
+      - postgres
+      - kafka
+  service2:
+    container_name: service2
+    ports:
+      - 5000:4000
+    build: ./service2
+    volumes:
+      - ./service2:/app
+    environment:
+      - PORT=4000
+      - MONGO_URL:mongodb://mongo:27017/service2
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - KAFKA_TOPIC=topic1
+    depends_on:
+      - mongo
+      - kafka
+    
+
+
+
+
+    
